@@ -350,6 +350,7 @@ async function update(timestamp) {
 window.onload = () => start()
 
 document.onkeydown = (e) => {
+    console.log(e.key)
     switch (e.key) {
         case "w":
             isLive = true;
@@ -364,6 +365,22 @@ document.onkeydown = (e) => {
             direction = "S"
             break
         case "a":
+            isLive = true;
+            direction = "W"
+            break
+        case "ArrowUp":
+            isLive = true;
+            direction = "N"
+            break
+        case "ArrowRight":
+            isLive = true;
+            direction = "E"
+            break
+        case "ArrowDown":
+            isLive = true;
+            direction = "S"
+            break
+        case "ArrowLeft":
             isLive = true;
             direction = "W"
             break
