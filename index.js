@@ -5,7 +5,7 @@ const ctx = canvas.getContext("2d");
 
 const areaSize = 17;
 const squareWidth = (canvas.width - (30 * 2)) / areaSize;
-const updateTime = 1000 / 9;
+const updateTime = 150; // ms
 let currentPoints = 0;
 let topPoints = 0;
 
@@ -195,18 +195,20 @@ class Snake  {
         }
     }
 
-    #drawEndBody(x, y, direction = 0, isHead = false) {
+    #drawEndBody(x, y, direction = 0, isHead = false, progress = 0 /* 0-100 */) {
+        progress = (isHead ? progress % 1 : 1 - (progress % 1))
+        const partialMove = squareWidth * progress
         direction = direction % 360
         if (isHead) {
             let grd;
             if (direction < 90) {
-                grd = ctx.createLinearGradient(startPos.x + x * squareWidth, 0, startPos.x + (x + .8) * squareWidth, 0);
+                grd = ctx.createLinearGradient(startPos.x + x * squareWidth + partialMove, 0, startPos.x + (x + .8) * squareWidth + partialMove, 0);
             } else if (direction < 180) {
-                grd = ctx.createLinearGradient(0, startPos.y + y * squareWidth, 0, startPos.y + (y + .8) * squareWidth);
+                grd = ctx.createLinearGradient(0, startPos.y + y * squareWidth + partialMove, 0, startPos.y + (y + .8) * squareWidth + partialMove);
             } else if (direction < 270) {
-                grd = ctx.createLinearGradient(startPos.x + (x + .8) * squareWidth, 0, startPos.x + x * squareWidth, 0);
+                grd = ctx.createLinearGradient(startPos.x + (x + .8) * squareWidth - partialMove, 0, startPos.x + x * squareWidth - partialMove, 0);
             } else if (direction < 360) {
-                grd = ctx.createLinearGradient(0, startPos.y + (y + .8) * squareWidth, 0, startPos.y + y * squareWidth);
+                grd = ctx.createLinearGradient(0, startPos.y + (y + .8) * squareWidth - partialMove, 0, startPos.y + y * squareWidth - partialMove);
             }
             grd.addColorStop(0, this.color);
             grd.addColorStop(1, "#E5820E");
@@ -218,22 +220,55 @@ class Snake  {
         
         ctx.beginPath()
         if (direction < 90) {
-            ctx.rect(startPos.x + x * squareWidth, startPos.y + y * squareWidth + squareWidth * (1 - this.width) / 2, squareWidth / 2, squareWidth * this.width)
-            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
+            ctx.rect(startPos.x + x * squareWidth, startPos.y + y * squareWidth + squareWidth * (1 - this.width) / 2, partialMove, squareWidth * this.width)
+            ctx.ellipse(startPos.x + x * squareWidth + partialMove, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
         } else if (direction < 180) {
-            ctx.rect(startPos.x + x * squareWidth + squareWidth * (1 - this.width) / 2, startPos.y + y * squareWidth, squareWidth * this.width, squareWidth / 2)
-            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
+            ctx.rect(startPos.x + x * squareWidth + squareWidth * (1 - this.width) / 2, startPos.y + y * squareWidth, squareWidth * this.width, partialMove)
+            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + y * squareWidth + partialMove, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
         } else if (direction < 270) {
-            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
-            ctx.rect(startPos.x + (x + .5) * squareWidth, startPos.y + y * squareWidth + squareWidth * (1 - this.width) / 2, squareWidth / 2, squareWidth * this.width)
+            ctx.ellipse(startPos.x + (x + Math.abs(progress - 1)) * squareWidth, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
+            ctx.rect(startPos.x + (x + Math.abs(progress - 1)) * squareWidth, startPos.y + y * squareWidth + squareWidth * (1 - this.width) / 2, partialMove, squareWidth * this.width)
         } else if (direction < 360) {
-            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + y * squareWidth + squareWidth / 2, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
-            ctx.rect(startPos.x + x * squareWidth + squareWidth * (1 - this.width) / 2, startPos.y + (y + .5) * squareWidth, squareWidth * this.width, squareWidth / 2)
+            ctx.ellipse(startPos.x + x * squareWidth + squareWidth / 2, startPos.y + (y + Math.abs(progress - 1)) * squareWidth, squareWidth / 2 * this.width, squareWidth / 2 * this.width, direction * Math.PI / 180, Math.PI / -2, Math.PI / 2)
+            ctx.rect(startPos.x + x * squareWidth + squareWidth * (1 - this.width) / 2, startPos.y + (y + Math.abs(progress - 1)) * squareWidth, squareWidth * this.width, partialMove)
         }
         ctx.fill()
+
+        if (!isHead) return;
+        ctx.beginPath()
+        ctx.lineWidth = squareWidth * this.width * .13
+        ctx.strokeStyle = "white"
+        ctx.fillStyle = "black"
+        if (direction < 90) {
+            ctx.arc(startPos.x + (x + .3) * squareWidth + partialMove, startPos.y + (y + .25) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(startPos.x + (x + .3) * squareWidth + partialMove, startPos.y + (y + .75) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+        } else if (direction < 180) {
+            ctx.arc(startPos.x + (x + .25) * squareWidth, startPos.y + (y + .3) * squareWidth + partialMove, squareWidth * this.width * .17, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(startPos.x + (x + .75) * squareWidth, startPos.y + (y + .3) * squareWidth + partialMove, squareWidth * this.width * .17, 0, Math.PI * 2)
+        } else if (direction < 270) {
+            ctx.arc(startPos.x + (x + Math.abs(progress - 1) - .3) * squareWidth, startPos.y + (y + .25) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(startPos.x + (x + Math.abs(progress - 1) - .3) * squareWidth, startPos.y + (y + .75) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+        } else if (direction < 360) {
+            ctx.arc(startPos.x + (x + .25) * squareWidth, startPos.y + (y + Math.abs(progress - 1) - .3) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(startPos.x + (x + .75) * squareWidth, startPos.y + (y + Math.abs(progress - 1) - .3) * squareWidth, squareWidth * this.width * .17, 0, Math.PI * 2)
+        }
+        ctx.fill()
+        ctx.stroke()
     }
 
-    drawBody() {
+    drawBody(unit) {
         this.size.forEach((value, index, array) => {
             let prev = (index != 0 ? array[index - 1] : null)
             let next = (index != array.length - 1 ? array[index + 1] : null)
@@ -246,7 +281,7 @@ class Snake  {
                     )
                 )
                 ctx.beginPath()
-                this.#drawEndBody(value.x, value.y, direction, true)
+                this.#drawEndBody(value.x, value.y, direction, true, unit)
             } else if (index == array.length - 1) {
                 const direction = (prev.x == value.x - 1 ? 0 :
                     (prev.x == value.x + 1 ? 180 :
@@ -254,7 +289,7 @@ class Snake  {
                     )
                 )
                 ctx.beginPath()
-                this.#drawEndBody(value.x, value.y, direction, false)
+                this.#drawEndBody(value.x, value.y, direction, false, unit)
             } else {
                 if (prev.y == next.y) {
                     this.#drawMidBody(value.x, value.y, 0)
@@ -282,7 +317,7 @@ class Snake  {
     }
 }
 
-async function start() {
+function start() {
     reloadScene()
     snake = new Snake(Math.round(areaSize))
     apple = new Apple(Math.round(areaSize))
@@ -291,7 +326,7 @@ async function start() {
     requestAnimationFrame(update)
 }
 
-async function update(timestamp) {
+function update(timestamp) {
     requestAnimationFrame(update)
     if (isLive) time += timestamp - lastTimestamp;
     if (isLive && time >= updateTime) {
@@ -328,6 +363,7 @@ async function update(timestamp) {
             isLive = false;
             currentPoints = 0;
             direction = "E"
+            new Audio("/music/end.mp3").play()
             requestAnimationFrame(start)
             return;
         }
@@ -337,17 +373,22 @@ async function update(timestamp) {
             currentPoints++;
             if (topPoints < currentPoints)
                 topPoints = currentPoints;
+            new Audio("/music/eat.mp3").play()
         } else {
             snake.size.pop()
         }
-        reloadScene()
-        snake.drawBody()
-        apple.draw()
     }
     lastTimestamp = timestamp;
+    reloadScene()
+    snake.drawBody(time / updateTime)
+    apple.draw()
 }
 
-window.onload = () => start()
+window.onload = () => {
+    start()
+    new Audio("/music/bg.mp3").play()
+    setInterval(() => {new Audio("/music/bg.mp3").play()}, 160000)
+}
 
 document.onkeydown = (e) => {
     console.log(e.key)
