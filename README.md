@@ -1,1 +1,1 @@
-# Pozdrawiam Kamila Cioska
+Gra snake, wykonana na zajęcia
